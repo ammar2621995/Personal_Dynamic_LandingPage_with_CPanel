@@ -224,5 +224,5 @@ MIT License — free to use, modify, and distribute.
 
 ## 🙋 Author
 
-Built and designed with ❤️ as a full-stack developer portfolio platform.  
+Built and designed with Ammar M Almansor as a full-stack developer portfolio platform.  
 Feel free to fork, customize, and make it your own.
