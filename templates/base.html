@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ info.name }} - Portfolio{% endblock %}</title>
+    <!-- AOS CSS for scroll animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Tailwind CSS Inline -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#111827',
+                        secondary: '#1f2937',
+                        accent: '#F5A623',
+                        light: '#E5E7EB',
+                        muted: '#9CA3AF'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #111827;
+            color: #E5E7EB;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .markdown-body h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #F5A623;
+        }
+
+        .markdown-body h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+            color: #D1D5DB;
+        }
+
+        .markdown-body ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .markdown-body ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-body pre {
+            background: #1f2937;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-body code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            color: #F5A623;
+        }
+
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid #F5A623;
+            padding-left: 1rem;
+            font-style: italic;
+            color: #9CA3AF;
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-body a {
+            color: #F5A623;
+            text-decoration: underline;
+        }
+
+        /* Smooth Global Fade Animation */
+        body {
+            animation: fadeInPage 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInPage {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Glassmorphism Classes for UI */
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .markdown-achievement p {
+            margin: 0;
+            display: inline;
+        }
+
+        /* Mouse Particle Effect */
+        .cursor-particle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background: var(--p-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            animation: particleFade 0.6s ease-out forwards;
+        }
+
+        @keyframes particleFade {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <header class="fixed top-0 left-0 w-full z-[100] bg-primary/95 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="{{ url_for('home') }}"
+                class="text-xl font-bold tracking-tight text-white hover:text-accent transition">
+                {{ info.name.split()[0] }}.<span class="text-accent">dev</span>
+            </a>
+            <nav class="hidden md:flex gap-8 items-center">
+                <a href="{{ url_for('projects') }}"
+                    class="text-sm font-medium hover:text-accent transition">Portfolio</a>
+                <a href="{{ url_for('blog') }}" class="text-sm font-medium hover:text-accent transition">Blog</a>
+                <a href="{{ url_for('contact') }}"
+                    class="text-sm border border-accent text-accent px-4 py-2 rounded hover:bg-accent hover:text-primary transition">Contact</a>
+                {% if is_admin %}
+                <a href="{{ url_for('admin_dash') }}"
+                    class="text-sm font-bold text-red-400 ml-4 hover:underline">Dashboard</a>
+                {% endif %}
+            </nav>
+        </div>
+        <!-- Global Progress Bar Hook -->
+        <div id="progress-container"
+            class="absolute bottom-0 left-0 w-full h-[3px] bg-transparent pointer-events-none overflow-hidden">
+            <div id="progress-bar"
+                class="h-full bg-gradient-to-r from-accent via-rose-500 to-indigo-500 shadow-[0_0_15px_rgba(245,166,35,0.6)] transition-all duration-75 w-0">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-24 pb-16">
+        <!-- Flashes -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="max-w-4xl mx-auto px-6 mb-8">
+            {% for category, message in messages %}
+            <div
+                class="p-4 rounded mb-2 {% if category == 'error' %}bg-red-900/50 border border-red-500 text-red-200{% elif category == 'success' %}bg-green-900/50 border border-green-500 text-green-200{% else %}bg-blue-900/50 border border-blue-500 text-blue-200{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary/50 border-t border-secondary mt-auto py-12">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0 text-muted">
+                &copy; {{ range(2023, 2030) | random }} {{ info.name }}. All rights reserved.
+            </div>
+            <div class="flex gap-6">
+                {% set links = info.get_social_links() %}
+                {% if links.get('github') %}<a href="{{ links['github'] }}" target="_blank"
+                    class="text-muted hover:text-accent transition">GitHub</a>{% endif %}
+                {% if links.get('linkedin') %}<a href="{{ links['linkedin'] }}" target="_blank"
+                    class="text-muted hover:text-accent transition">LinkedIn</a>{% endif %}
+                {% if links.get('facebook') %}<a href="{{ links['facebook'] }}" target="_blank"
+                    class="text-muted hover:text-accent transition">Facebook</a>{% endif %}
+                {% if links.get('youtube') %}<a href="{{ links['youtube'] }}" target="_blank"
+                    class="text-muted hover:text-accent transition">YouTube</a>{% endif %}
+            </div>
+        </div>
+    </footer>
+
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Vanilla Tilt JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100,
+            easing: 'ease-out-cubic'
+        });
+
+        // Global Progress Bar Logic
+        window.addEventListener('scroll', () => {
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                progressBar.style.width = scrolled + "%";
+            }
+        });
+
+        // Initialize Vanilla Tilt on any element with data-tilt attribute
+        VanillaTilt.init(document.querySelectorAll("[data-tilt]"), {
+            max: 5,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.15,
+            scale: 1.02
+        });
+
+        // ── YouTube Auto-Embed Utility ───────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            /**
+             * Extract a YouTube video ID from various URL formats:
+             *   https://www.youtube.com/watch?v=ID
+             *   https://youtu.be/ID
+             *   https://www.youtube.com/embed/ID
+             *   https://www.youtube.com/shorts/ID
+             */
+            function getYouTubeId(url) {
+                try {
+                    const u = new URL(url);
+                    if (u.hostname.includes('youtube.com')) {
+                        if (u.pathname.startsWith('/embed/')) return u.pathname.split('/embed/')[1].split('?')[0];
+                        if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/shorts/')[1].split('?')[0];
+                        return u.searchParams.get('v');
+                    }
+                    if (u.hostname === 'youtu.be') return u.pathname.slice(1).split('?')[0];
+                } catch (_) {}
+                return null;
+            }
+
+            /** Build a premium responsive YouTube iframe wrapper */
+            function buildEmbed(videoId, originalHref) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'yt-embed-wrapper';
+                wrapper.innerHTML = `
+                    <div class="yt-embed-header">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="yt-icon" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube</span>
+                        <a href="${originalHref}" target="_blank" rel="noopener" class="yt-open-link">
+                            Open on YouTube ↗
+                        </a>
+                    </div>
+                    <div class="yt-embed-ratio">
+                        <iframe
+                            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1"
+                            title="YouTube Video"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                `;
+                return wrapper;
+            }
+
+            // Scan these content containers on any page
+            const contentAreas = [
+                document.getElementById('article-content'),   // blog_detail.html
+                document.querySelector('.markdown-body'),     // project_detail.html description
+            ].filter(Boolean);
+
+            contentAreas.forEach(area => {
+                // 1. Replace <a> tags that link to YouTube
+                area.querySelectorAll('a').forEach(anchor => {
+                    const id = getYouTubeId(anchor.href);
+                    if (id) {
+                        const embed = buildEmbed(id, anchor.href);
+                        anchor.replaceWith(embed);
+                    }
+                });
+
+                // 2. Catch bare YouTube URLs in plain text nodes (e.g. a lone URL on its own line)
+                const walker = document.createTreeWalker(area, NodeFilter.SHOW_TEXT);
+                const textNodes = [];
+                while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+                const ytPattern = /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]+/g;
+                textNodes.forEach(node => {
+                    const text = node.textContent;
+                    if (!ytPattern.test(text)) return;
+                    ytPattern.lastIndex = 0;
+
+                    const frag = document.createDocumentFragment();
+                    let lastIdx = 0;
+                    let match;
+                    while ((match = ytPattern.exec(text)) !== null) {
+                        const id = getYouTubeId(match[0]);
+                        if (!id) continue;
+                        // Text before the URL
+                        if (match.index > lastIdx) frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
+                        // Embed
+                        frag.appendChild(buildEmbed(id, match[0]));
+                        lastIdx = match.index + match[0].length;
+                    }
+                    if (lastIdx < text.length) frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+                    node.replaceWith(frag);
+                });
+            });
+        });
+    </script>
+
+    <style>
+        /* ── YouTube Embed Styles ─────────────────────────────── */
+        .yt-embed-wrapper {
+            margin: 2rem 0;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.07);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: #0f1117;
+        }
+        .yt-embed-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #9ca3af;
+            letter-spacing: 0.05em;
+        }
+        .yt-icon { width: 16px; height: 16px; flex-shrink: 0; }
+        .yt-open-link {
+            margin-left: auto;
+            color: #F5A623;
+            text-decoration: none;
+            font-size: 0.7rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .yt-open-link:hover { opacity: 1; }
+        .yt-embed-ratio {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+        }
+        .yt-embed-ratio iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+    <script>
+        // Mouse Particle Effect Logic
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.1) {
+                const particle = document.createElement('div');
+                particle.className = 'cursor-particle';
+
+                const colors = ['#F5A623', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6', '#FFFFFF'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+                const size = Math.random() * 20 + 3;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+
+                particle.style.setProperty('--p-color', randomColor);
+                particle.style.left = e.clientX + 'px';
+                particle.style.top = e.clientY + 'px';
+
+                const offset = 25;
+                particle.style.marginLeft = (Math.random() * offset - offset / 2) + 'px';
+                particle.style.marginTop = (Math.random() * offset - offset / 2) + 'px';
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => { particle.remove(); }, 900);
+            }
+        });
+    </script>
+</body>
+</html>

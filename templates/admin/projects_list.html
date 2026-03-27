@@ -1,0 +1,69 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-white">Projects</h1>
+    <div class="flex gap-4">
+        <button onclick="saveSorting()" id="sortBtn" class="bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded hover:bg-gray-700 hidden">Save Order</button>
+        <a href="{{ url_for('admin_project_edit') }}" class="bg-accent text-primary font-bold px-4 py-2 rounded hover:bg-yellow-400 transition">+ Add Project</a>
+    </div>
+</div>
+
+<div class="bg-secondary rounded-xl border border-gray-800 overflow-hidden shadow">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-primary border-b border-gray-800 text-sm font-medium text-gray-400 uppercase tracking-widest">
+            <tr>
+                <th class="p-4 w-12">#</th>
+                <th class="p-4">Project Title</th>
+                <th class="p-4 w-32 text-center">Featured</th>
+                <th class="p-4 w-32 text-center">Sort Order</th>
+                <th class="p-4 w-48 text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800">
+            {% for p in projects %}
+            <tr class="hover:bg-gray-800/30 transition">
+                <td class="p-4 text-gray-500">{{ p.id }}</td>
+                <td class="p-4">
+                    <div class="font-bold text-white">{{ p.title }}</div>
+                    <div class="text-xs text-gray-500 line-clamp-1 mt-1">{{ p.description }}</div>
+                </td>
+                <td class="p-4 text-center">
+                    {% if p.is_featured %}<span class="text-accent text-xl">★</span>{% endif %}
+                </td>
+                <td class="p-4 text-center">
+                    <input type="number" value="{{ p.sort_order }}" data-pid="{{ p.id }}" class="sort-input w-16 bg-primary border border-gray-700 rounded px-2 py-1 text-center text-white" onchange="document.getElementById('sortBtn').classList.remove('hidden')">
+                </td>
+                <td class="p-4 text-right flex justify-end gap-3">
+                    <a href="{{ url_for('admin_project_edit', id=p.id) }}" class="text-gray-400 hover:text-white font-medium border border-gray-700 px-3 py-1 rounded">Edit</a>
+                    <form method="POST" onsubmit="return confirm('Are you sure you want to delete this project?');">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" value="{{ p.id }}">
+                        <button type="submit" class="bg-red-900/40 text-red-400 hover:bg-red-900/80 hover:text-red-200 border border-red-900/50 px-3 py-1 rounded font-medium transition">Del</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="p-8 text-center text-muted">No projects found. Add one to start.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function saveSorting() {
+    let inputs = document.querySelectorAll('.sort-input');
+    let orders = {};
+    inputs.forEach(i => orders[i.getAttribute('data-pid')] = i.value);
+    
+    let fd = new FormData();
+    fd.append('action', 'reorder');
+    fd.append('orders', JSON.stringify(orders));
+    
+    fetch('{{ url_for("admin_projects") }}', {method: 'POST', body: fd})
+    .then(r => r.json())
+    .then(d => {
+        if(d.status === 'ok') location.reload();
+    });
+}
+</script>
+{% endblock %}

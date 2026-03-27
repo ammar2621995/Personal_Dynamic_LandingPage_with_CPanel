@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Home - {{ info.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-12 md:py-24 grid md:grid-cols-2 gap-12 items-center" data-aos="fade-right">
+    <div class="space-y-6">
+        {% if info.employment_status == 'available' %}
+        <span class="inline-flex items-center rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
+            ● Available for new opportunities
+        </span>
+        {% else %}
+        <span class="inline-flex items-center rounded-full bg-yellow-500/10 px-3 py-1 text-sm font-medium text-yellow-400 ring-1 ring-inset ring-yellow-500/20">
+            ● Currently Employed
+        </span>
+        {% endif %}
+        
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-white leading-tight">
+            Hi, I'm <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-yellow-300">{{ info.name }}</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl text-muted leading-relaxed">
+            {{ info.bio }}
+        </p>
+        
+        <div class="flex gap-4 pt-4">
+            <a href="{{ url_for('projects') }}" class="rounded-md bg-accent px-6 py-3 text-sm font-semibold text-primary shadow-sm hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition">
+                View My Work
+            </a>
+            <a href="{{ url_for('contact') }}" class="rounded-md bg-secondary border border-gray-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 transition">
+                Contact Me
+            </a>
+        </div>
+    </div>
+    
+    <div class="flex justify-center md:justify-end" data-aos="fade-left" data-aos-delay="200">
+        {% if info.profile_image %}
+        <div class="relative" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+            <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-accent to-yellow-400 opacity-30 blur-lg transition duration-500 group-hover:opacity-60"></div>
+            <img src="{{ info.profile_image }}" alt="{{ info.name }}" class="relative rounded-2xl shadow-2xl max-w-sm w-full object-cover border border-gray-700">
+        </div>
+        {% else %}
+        <div class="w-72 h-72 rounded-full bg-secondary flex items-center justify-center border border-gray-700 shadow-2xl text-6xl font-bold text-gray-500">
+            {{ info.name[0] }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Featured Projects -->
+<section class="bg-secondary/30 mt-16 py-20 border-y border-gray-800" data-aos="fade-up">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="flex justify-between items-end mb-12">
+            <div>
+                <h2 class="text-3xl font-bold text-white mb-2">Featured Projects</h2>
+                <p class="text-muted">A selection of my best work.</p>
+            </div>
+            <a href="{{ url_for('projects') }}" class="text-accent hover:underline hidden md:block">View all projects &rarr;</a>
+        </div>
+        
+        {% if not projects %}
+        <p class="text-muted text-center py-12">No featured projects yet.</p>
+        {% else %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for p in projects %}
+            <article class="group relative bg-secondary/40 rounded-3xl border border-white/5 overflow-hidden transition-all duration-500 hover:border-accent/50 hover:shadow-[0_0_30px_rgba(245,166,35,0.1)]" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+                <div class="relative h-56 overflow-hidden">
+                    {% if p.background_image %}
+                    <img src="{{ p.background_image }}" class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    {% endif %}
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-60"></div>
+                    <div class="absolute bottom-4 left-4 flex flex-wrap gap-2">
+                        {% for t in (p.technologies_used|from_json)[:3] %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-black/40 backdrop-blur-md text-accent px-2.5 py-1 rounded-md border border-white/10">{{ t }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-accent transition duration-300">{{ p.title }}</h3>
+                    <div class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 prose-invert">
+                        {{ p.description|striptags }}
+                    </div>
+                    <a href="{{ url_for('project_detail', id=p.id) }}" class="inline-flex items-center gap-2 text-sm font-bold text-white group/link">
+                        Explore Case Study 
+                        <svg class="w-4 h-4 text-accent transition-transform group-hover/link:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="mt-8 text-center md:hidden">
+            <a href="{{ url_for('projects') }}" class="text-accent hover:underline">View all projects &rarr;</a>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Writings -->
+<section class="max-w-6xl mx-auto px-6 py-20" data-aos="fade-up">
+    <div class="flex justify-between items-end mb-12">
+        <div>
+            <h2 class="text-3xl font-bold text-white mb-2">Recent Writings</h2>
+            <p class="text-muted">Insights and thoughts on software engineering.</p>
+        </div>
+        <a href="{{ url_for('blog') }}" class="text-accent hover:underline hidden md:block">View all posts &rarr;</a>
+    </div>
+    
+    {% if not articles %}
+    <p class="text-muted text-center py-12">No articles published yet.</p>
+    {% else %}
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for a in articles %}
+        <a href="{{ url_for('blog_detail', slug=a.slug) }}" class="group block rounded-3xl bg-secondary/20 border border-white/5 overflow-hidden transition-all duration-500 hover:bg-secondary/40 hover:border-white/10" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+            <div class="relative h-48 overflow-hidden">
+                {% if a.cover_image %}
+                <img src="{{ a.cover_image }}" class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                {% endif %}
+                <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+                <div class="absolute bottom-4 left-4">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-accent-light bg-accent/20 px-2 py-1 rounded">Article</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <time class="text-[11px] font-mono text-gray-500 uppercase tracking-widest mb-3 block">{{ a.created_at.strftime('%B %d, %Y') }}</time>
+                <h3 class="text-xl font-bold text-white mb-4 group-hover:text-accent transition duration-300 leading-tight">{{ a.title }}</h3>
+                <span class="text-sm font-semibold text-gray-400 flex items-center gap-1 group-hover:text-white transition">
+                    Read Post <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

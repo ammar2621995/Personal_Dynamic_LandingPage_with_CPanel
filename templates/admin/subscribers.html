@@ -1,0 +1,58 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-white">Subscribers List</h1>
+    <button onclick="downloadCSV()" class="bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded hover:bg-gray-700 font-medium">Export CSV</button>
+</div>
+
+<div class="bg-secondary rounded-xl border border-gray-800 overflow-hidden shadow">
+    <table class="w-full text-left border-collapse" id="subTable">
+        <thead class="bg-primary border-b border-gray-800 text-sm font-medium text-gray-400 uppercase tracking-widest">
+            <tr>
+                <th class="p-4 w-16">#</th>
+                <th class="p-4">Email Address</th>
+                <th class="p-4 w-64 text-right">Subscribed On</th>
+                <th class="p-4 w-32 text-right">Action</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800">
+            {% for s in subs %}
+            <tr class="hover:bg-gray-800/30 transition">
+                <td class="p-4 text-gray-500 font-mono">{{ loop.index }}</td>
+                <td class="p-4 font-bold text-white">{{ s.email }}</td>
+                <td class="p-4 text-right text-sm text-gray-400 font-mono">{{ s.subscribed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td class="p-4 text-right">
+                    <form method="POST" onsubmit="return confirm('Remove subscriber?');">
+                        <input type="hidden" name="id" value="{{ s.id }}">
+                        <button type="submit" class="text-red-500 hover:text-red-400 text-sm font-medium hover:underline">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="p-8 text-center text-muted">No subscribers yet. Keep writing!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function downloadCSV() {
+    let csv = 'Email,Subscribed Date\n';
+    {% for s in subs %}
+    csv += "{{ s.email }},{{ s.subscribed_at.strftime('%Y-%m-%d %H:%M') }}\n";
+    {% endfor %}
+    
+    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a");
+    if (link.download !== undefined) {
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "portfolio_subscribers.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+</script>
+{% endblock %}

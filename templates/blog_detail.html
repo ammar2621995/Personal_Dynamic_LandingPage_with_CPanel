@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}{{ a.title }} - Blog{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-12 lg:py-24">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-20">
+        
+        <!-- Main Content (78% roughly) -->
+        <article class="lg:col-span-3 space-y-16" data-aos="fade-up">
+            
+            <!-- Article Metrics Header -->
+            <header class="space-y-8">
+                <div class="flex flex-wrap items-center gap-6 text-[10px] font-bold uppercase tracking-[0.3em] text-accent">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        {{ a.created_at.strftime('%B %d, %Y') }}
+                    </div>
+                    <div class="flex items-center gap-2 text-muted">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="read-time">Calculating...</span>
+                    </div>
+                </div>
+
+                <h1 class="text-5xl md:text-7xl font-black text-white leading-[1.05] tracking-tight">{{ a.title }}</h1>
+                
+                <div class="flex items-center gap-5 p-1 pr-6 bg-white/5 w-fit rounded-full border border-white/5">
+                    {% if info.profile_image %}
+                    <img src="{{ info.profile_image }}" class="w-12 h-12 rounded-full border-2 border-accent/20 object-cover">
+                    {% endif %}
+                    <div class="text-sm">
+                        <span class="text-white font-bold block">{{ info.name }}</span>
+                        <span class="text-[10px] font-mono text-muted uppercase">Verified Author</span>
+                    </div>
+                </div>
+            </header>
+
+            {% if a.cover_image %}
+            <div class="relative group rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl transition-all duration-700 hover:border-accent/40">
+                <img src="{{ a.cover_image }}" alt="Cover" class="w-full h-auto object-cover transform scale-100 group-hover:scale-105 transition duration-[3000ms]">
+                <div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent"></div>
+            </div>
+            {% endif %}
+
+            <!-- Article Body -->
+            <div id="article-content" class="markdown-body prose prose-invert prose-xl max-w-none text-gray-300 selection:bg-accent/30 selection:text-white">
+                {{ a.content|markdown|safe }}
+            </div>
+
+            <!-- Footer Meta -->
+            <footer class="pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-12">
+                <div class="flex flex-wrap gap-3">
+                    {% for tag in a.tags|from_json %}
+                    <a href="{{ url_for('blog', tag=tag) }}" class="px-5 py-2.5 bg-white/5 border border-white/5 text-gray-400 text-[11px] font-mono uppercase tracking-widest rounded-full hover:border-accent hover:text-accent transition duration-300">#{{ tag }}</a>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex items-center gap-8">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Pass it on</p>
+                        <p class="text-xs text-white">Share this case study</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-muted hover:text-white hover:bg-[#1DA1F2] transition-all duration-500 shadow-lg"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
+                        <a href="https://www.linkedin.com/shareArticle?url={{ request.url }}" target="_blank" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-muted hover:text-white hover:bg-[#0A66C2] transition-all duration-500 shadow-lg"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+                    </div>
+                </div>
+            </footer>
+        </article>
+
+        <!-- Dynamic Sticky Sidebar (25% fixed) -->
+        <aside class="lg:col-span-1 hidden lg:block" data-aos="fade-left" data-aos-delay="200">
+            <div class="sticky top-16 space-y-12">
+                <!-- Advanced Table of Contents with Independent Scroll -->
+                <div class="glass-panel p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group">
+                    <div class="absolute -top-12 -right-12 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-all duration-500"></div>
+                    
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.4em] text-accent mb-6">Navigation</h4>
+                    <nav id="toc" class="space-y-4 relative z-10 max-h-[calc(100vh-250px)] overflow-y-auto pr-4 custom-scrollbar">
+                        <!-- Populated via JS -->
+                    </nav>
+                </div>
+
+                <!-- Contextual Newsletter Card -->
+                <div class="glass-panel p-8 rounded-[2rem] border border-white/5 shadow-2xl bg-gradient-to-br from-accent/10 to-transparent">
+                    <h5 class="text-white font-bold mb-2">Weekly Insights</h5>
+                    <form method="POST" action="{{ url_for('subscribe') }}" class="space-y-4 mt-6">
+                        <input type="email" name="email" placeholder="email@example.com" required class="w-full bg-black/40 border border-white/5 text-white text-xs rounded-2xl px-5 py-3.5 focus:border-accent outline-none hover:border-white/20 transition-all">
+                        <button class="w-full bg-accent text-primary font-black text-xs py-3.5 rounded-2xl hover:bg-yellow-400 transition transform hover:-translate-y-1 shadow-lg shadow-accent/10">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</div>
+
+<!-- Mobile Floating TOC Button -->
+<button id="mobile-toc-trigger" class="lg:hidden fixed bottom-8 right-8 w-14 h-14 bg-accent text-primary rounded-2xl shadow-2xl z-[90] flex items-center justify-center scale-0 transition-transform duration-500">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+</button>
+
+<style>
+    #toc a { display: block; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); line-height: 1.6; padding: 4px 0; }
+    #toc a.active { color: var(--accent); transform: translateX(8px); font-weight: 800; }
+    #toc .toc-h2 { font-size: 0.85rem; font-weight: 500; }
+    #toc .toc-h3 { font-size: 0.72rem; padding-left: 1rem; color: #6b7280; }
+    #article-content h1, #article-content h2, #article-content h3 { scroll-margin-top: 6rem; }
+    
+    /* Custom Scrollbar for TOC */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.2); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* Elegant transition for the progress bar */
+    #progress-bar { transition: width 0.1s linear; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const article = document.getElementById('article-content');
+    const tocContainer = document.getElementById('toc');
+    const progressBar = document.getElementById('progress-bar');
+    const readTimeElement = document.getElementById('read-time');
+    const headers = article.querySelectorAll('h1, h2, h3');
+    
+    // 1. Estimated Read Time Logic (Avg 200 words per min)
+    const text = article.innerText;
+    const wpm = 200;
+    const words = text.trim().split(/\s+/).length;
+    const time = Math.ceil(words / wpm);
+    readTimeElement.innerText = `${time} MIN READ — BY {{ info.name }}`;
+
+    // 2. TOC Generation
+    tocContainer.innerHTML = '';
+    if (headers.length === 0) {
+        tocContainer.innerHTML = '<p class="text-[10px] text-muted uppercase tracking-widest">No sections found</p>';
+    } else {
+        headers.forEach((header, index) => {
+            if (!header.id) header.id = 'anchor-' + index;
+            const link = document.createElement('a');
+            link.href = '#' + header.id;
+            link.textContent = header.textContent;
+            link.className = `text-muted hover:text-white toc-${header.tagName.toLowerCase()}`;
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+            });
+            tocContainer.appendChild(link);
+        });
+    }
+
+    // 3. Scroll Monitoring (Mobile Trigger + Scroll Spy)
+    const mobileTrigger = document.getElementById('mobile-toc-trigger');
+    
+    window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        
+        // Show/Hide Mobile Trigger
+        if (winScroll > 400) mobileTrigger.classList.add('scale-100');
+        else mobileTrigger.classList.remove('scale-100');
+
+        // Scroll Spy
+        let activeId = '';
+        headers.forEach(header => {
+            const top = header.getBoundingClientRect().top;
+            if (top < 150) activeId = header.id;
+        });
+        
+        let activeLink = null;
+        tocContainer.querySelectorAll('a').forEach(link => {
+            const isActive = link.getAttribute('href') === '#' + activeId;
+            link.classList.toggle('active', isActive);
+            if (isActive) activeLink = link;
+        });
+
+        // Auto-scroll the TOC container to keep the active link visible
+        if (activeLink) {
+            const tocRect = tocContainer.getBoundingClientRect();
+            const linkRect = activeLink.getBoundingClientRect();
+            // Only scroll if the active link is outside the visible area of the TOC
+            if (linkRect.top < tocRect.top || linkRect.bottom > tocRect.bottom) {
+                tocContainer.scrollTo({
+                    top: activeLink.offsetTop - tocContainer.offsetHeight / 2 + activeLink.offsetHeight / 2,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    });
+
+    // Mobile Trigger Scroll to Top for now or show menu
+    mobileTrigger.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+</script>
+{% endblock %}

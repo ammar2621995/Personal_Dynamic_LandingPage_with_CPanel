@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Tailwind CSS Inline -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { primary: '#111827', secondary: '#1f2937', accent: '#F5A623', muted: '#9CA3AF' } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary text-gray-200 antialiased flex flex-col md:flex-row min-h-screen">
+    
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-secondary border-r border-gray-800 flex-shrink-0">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+            <h2 class="text-xl font-bold text-white tracking-tight">CPanel</h2>
+            <a href="{{ url_for('home') }}" title="View Site" class="text-accent hover:text-yellow-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+        </div>
+        <nav class="flex flex-col py-4">
+            <a href="{{ url_for('admin_dash') }}" class="px-6 py-3 font-medium hover:bg-gray-800 hover:text-accent transition border-l-2 {% if request.endpoint == 'admin_dash' %}border-accent text-accent bg-gray-800{%else%}border-transparent text-gray-400{%endif%}">Overview</a>
+            <a href="{{ url_for('admin_projects') }}" class="px-6 py-3 font-medium hover:bg-gray-800 hover:text-accent transition border-l-2 {% if 'project' in request.endpoint %}border-accent text-accent bg-gray-800{%else%}border-transparent text-gray-400{%endif%}">Projects</a>
+            <a href="{{ url_for('admin_blog') }}" class="px-6 py-3 font-medium hover:bg-gray-800 hover:text-accent transition border-l-2 {% if 'blog' in request.endpoint %}border-accent text-accent bg-gray-800{%else%}border-transparent text-gray-400{%endif%}">Articles</a>
+            <a href="{{ url_for('admin_profile') }}" class="px-6 py-3 font-medium hover:bg-gray-800 hover:text-accent transition border-l-2 {% if request.endpoint == 'admin_profile' %}border-accent text-accent bg-gray-800{%else%}border-transparent text-gray-400{%endif%}">Profile & Settings</a>
+            <a href="{{ url_for('admin_messages') }}" class="px-6 py-3 font-medium hover:bg-gray-800 hover:text-accent transition border-l-2 {% if 'message' in request.endpoint %}border-accent text-accent bg-gray-800{%else%}border-transparent text-gray-400{%endif%}">Messages</a>
+            <a href="{{ url_for('admin_subscribers') }}" class="px-6 py-3 font-medium hover:bg-gray-800 hover:text-accent transition border-l-2 {% if 'subscribe' in request.endpoint %}border-accent text-accent bg-gray-800{%else%}border-transparent text-gray-400{%endif%}">Subscribers</a>
+            
+            <hr class="border-gray-800 my-4">
+            <a href="{{ url_for('logout') }}" class="px-6 py-3 font-medium text-red-400 hover:bg-gray-800 hover:text-red-300 transition">Logout</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-6 md:p-10 overflow-x-hidden">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-6 space-y-2">
+            {% for category, message in messages %}
+              <div class="px-4 py-3 rounded-lg flex items-center {% if category == 'error' %}bg-red-900/50 border border-red-500 text-red-200{% elif category == 'success' %}bg-green-900/50 border border-green-500 text-green-200{% else %}bg-blue-900/50 border border-blue-500 text-blue-200{% endif %}">
+                  {{ message }}
+              </div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block admin_content %}{% endblock %}
+    </main>
+    
+    <script>
+        // Simple autosubmit logic for forms if needed
+    </script>
+</body>
+</html>

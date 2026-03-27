@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Blog - {{ info.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-12">
+    <div class="max-w-2xl mb-12" data-aos="fade-right">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Writing</h1>
+        <p class="text-lg text-muted mb-8">Thoughts on engineering, systems design, and product building.</p>
+        
+        <form method="GET" action="{{ url_for('blog') }}" class="flex gap-2">
+            <input type="text" name="q" placeholder="Search articles..." value="{{ search_q }}"
+                   class="flex-grow bg-secondary border border-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-accent focus:outline-none">
+            {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+            <button type="submit" class="bg-accent text-primary px-6 py-2 rounded-md font-bold hover:bg-yellow-400 transition">Search</button>
+        </form>
+    </div>
+
+    {% if active_tag or search_q %}
+    <div class="mb-8 flex items-center gap-4 text-sm">
+        <span class="text-muted">Showing results for:</span>
+        {% if search_q %}<span class="px-3 py-1 bg-gray-800 text-gray-300 rounded border border-gray-700">"{{ search_q }}"</span>{% endif %}
+        {% if active_tag %}<span class="px-3 py-1 bg-accent/10 border border-accent/30 text-accent rounded-full">#{{ active_tag }}</span>{% endif %}
+        <a href="{{ url_for('blog') }}" class="text-gray-500 hover:text-white underline">Clear all</a>
+    </div>
+    {% endif %}
+
+    {% if not articles %}
+    <div class="text-center py-20 bg-secondary/30 rounded-2xl border border-dashed border-gray-800">
+        <p class="text-muted text-lg">No articles found.</p>
+    </div>
+    {% else %}
+    <div class="space-y-8 max-w-4xl">
+        {% for a in articles %}
+        <article class="group bg-secondary/20 p-6 rounded-2xl border border-transparent hover:border-gray-700 transition duration-300 hover:bg-secondary/40 hover:shadow-xl" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+            <div class="grid md:grid-cols-[1fr_3fr] gap-6 md:gap-10">
+                <div class="md:text-right pt-2">
+                    <time datetime="{{ a.created_at.isoformat() }}" class="text-sm font-mono text-gray-500 block mb-2">
+                        {{ a.created_at.strftime('%B %d, %Y') }}
+                    </time>
+                    <div class="flex flex-wrap md:justify-end gap-1.5">
+                        {% for tag in a.tags|from_json %}
+                        <a href="{{ url_for('blog', tag=tag) }}" class="text-[11px] uppercase tracking-wider text-accent bg-accent/5 px-2 py-0.5 rounded border border-accent/20 hover:bg-accent/20 transition">#{{ tag }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <a href="{{ url_for('blog_detail', slug=a.slug) }}" class="block text-2xl font-bold text-white mb-3 group-hover:text-accent transition duration-200">
+                        {{ a.title }}
+                    </a>
+                    <p class="text-gray-400 mb-4 line-clamp-3 leading-relaxed">
+                        {% if a.content|length > 200 %}{{ a.content[:200] }}...{% else %}{{ a.content }}{% endif %}
+                    </p>
+                    <a href="{{ url_for('blog_detail', slug=a.slug) }}" class="text-accent text-sm font-semibold hover:underline inline-flex items-center gap-1">
+                        Read Article <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

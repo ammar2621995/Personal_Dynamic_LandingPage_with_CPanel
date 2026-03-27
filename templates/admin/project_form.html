@@ -1,0 +1,135 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<!-- SimpleMDE for Markdown Editing -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<style>
+    .CodeMirror, .CodeMirror-scroll { min-height: 250px; background: #111827 !important; color: white !important; border-color: #374151 !important; }
+    .editor-toolbar { background: #1f2937 !important; border-color: #374151 !important; }
+    .editor-toolbar a { color: #9ca3af !important; }
+    .editor-toolbar a.active, .editor-toolbar a:hover { background: #374151 !important; }
+    .editor-preview { background: #111827 !important; }
+</style>
+<div class="flex items-center gap-4 mb-8">
+    <a href="{{ url_for('admin_projects') }}" class="text-muted hover:text-white text-xl">&larr;</a>
+    <h1 class="text-3xl font-bold text-white">{% if p.id %}Edit Project{% else %}New Project{% endif %}</h1>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="max-w-5xl bg-secondary border border-gray-800 rounded-xl p-8">
+    <div class="grid md:grid-cols-3 gap-10">
+        
+        <div class="md:col-span-2 space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Project Title</label>
+                <input type="text" name="title" value="{{ p.title or '' }}" required class="w-full bg-primary border border-gray-700 rounded p-3 text-white text-lg font-bold">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Description (Markdown Supported)</label>
+                <textarea name="description" id="markdown-editor" rows="12" class="w-full bg-primary font-mono text-sm border border-gray-700 rounded p-3 text-white">{{ p.description or '' }}</textarea>
+                <div class="text-xs text-muted mt-2">Rich text rendering will be applied on the public site.</div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">GitHub Repository Link</label>
+                    <input type="url" name="github_link" value="{{ p.github_link or '' }}" class="w-full bg-primary border border-gray-700 rounded p-3 text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Live Demo / Product Link</label>
+                    <input type="url" name="live_demo_link" value="{{ p.live_demo_link or '' }}" class="w-full bg-primary border border-gray-700 rounded p-3 text-white">
+                </div>
+            </div>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="bg-primary border border-gray-800 p-5 rounded-lg">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="is_featured" {% if p.is_featured %}checked{% endif %} class="w-5 h-5 accent-accent">
+                    <span class="text-white font-medium">Feature on Homepage</span>
+                </label>
+                <p class="text-xs text-muted mt-2">Featured projects appear as large cards on the main landing page.</p>
+            </div>
+            
+            <div class="bg-primary border border-gray-800 p-5 rounded-lg">
+                <label class="block text-sm font-medium text-gray-400 mb-3">Hero Background Image</label>
+                {% if p.background_image %}
+                <img src="{{ p.background_image }}" class="w-full h-32 object-cover rounded mb-4 border border-gray-700">
+                {% endif %}
+                <input type="file" name="background_image" class="block w-full text-xs text-gray-400 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-700 file:text-white cursor-pointer">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Technologies Used (Comma-separated)</label>
+                {% set tech_str = ', '.join((p.technologies_used|from_json) if p.technologies_used else []) %}
+                <input type="text" name="technologies_used" value="{{ tech_str }}" placeholder="Python, Next.js, Docker..." class="w-full bg-primary border border-gray-700 rounded p-3 text-white text-sm">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Key Achievements (One per line)</label>
+                {% set ach_str = '\n'.join((p.achievements|from_json) if p.achievements else []) %}
+                <textarea name="achievements" rows="5" placeholder="Increased conversion by 40%&#10;Reduced load time by 2s..." class="w-full bg-primary border border-gray-700 rounded p-3 text-white text-sm">{{ ach_str }}</textarea>
+            </div>
+
+            <!-- ── Project Attachments ── -->
+            <div class="bg-primary border border-gray-800 p-5 rounded-lg">
+                <label class="block text-sm font-medium text-gray-400 mb-3">
+                    📎 Project Attachments
+                    <span class="text-xs text-muted ml-2">(PDFs, ZIPs, Docs, Videos, etc.)</span>
+                </label>
+
+                {% if p.id %}
+                {% set att_list = p.attachments|from_json %}
+                {% if att_list %}
+                <ul class="mb-4 space-y-2">
+                    {% for att in att_list %}
+                    <li class="flex items-center justify-between bg-secondary rounded-lg px-4 py-2.5 border border-gray-700">
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="text-accent text-lg">📄</span>
+                            <div>
+                                <p class="text-white font-medium">{{ att.name }}</p>
+                                <p class="text-xs text-muted">{{ (att.size / 1024)|int }} KB</p>
+                            </div>
+                        </div>
+                        <!-- Delete attachment form -->
+                        <form method="POST" style="display:inline"
+                              onsubmit="return confirm('Delete {{ att.name }}?')">
+                            <input type="hidden" name="title" value="{{ p.title or '' }}">
+                            <input type="hidden" name="description" value="{{ p.description or '' }}">
+                            <input type="hidden" name="github_link" value="{{ p.github_link or '' }}">
+                            <input type="hidden" name="live_demo_link" value="{{ p.live_demo_link or '' }}">
+                            <input type="hidden" name="technologies_used" value="{{ ', '.join(p.technologies_used|from_json) }}">
+                            <input type="hidden" name="achievements" value="{{ '\n'.join(p.achievements|from_json) }}">
+                            <input type="hidden" name="delete_attachment" value="{{ att.path }}">
+                            <button type="submit" class="text-red-500 hover:text-red-400 text-xs font-bold transition">✕ Remove</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-xs text-muted mb-4">No files attached yet.</p>
+                {% endif %}
+                {% endif %}
+
+                <input type="file" name="attachments" multiple
+                       class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:bg-accent file:text-primary file:font-bold cursor-pointer hover:file:bg-yellow-400 transition">
+                <p class="text-[11px] text-muted mt-2">Hold Ctrl/Cmd to select multiple files. Uploading won't remove existing ones.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 pt-6 border-t border-gray-800 text-right">
+        <a href="{{ url_for('admin_projects') }}" class="text-white hover:underline mr-6">Cancel</a>
+        <button type="submit" class="bg-accent text-primary font-bold px-8 py-3 rounded hover:bg-yellow-400 transition shadow">Save Project</button>
+    </div>
+</form>
+
+<script>
+    var simplemde = new SimpleMDE({ 
+        element: document.getElementById("markdown-editor"),
+        spellChecker: false,
+        status: false,
+        autosave: { enabled: false }
+    });
+</script>
+{% endblock %}
