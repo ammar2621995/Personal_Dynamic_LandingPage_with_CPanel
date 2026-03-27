@@ -79,6 +79,7 @@ LandingPage with CMS/
 ### Prerequisites
 - Python 3.9+
 - pip
+- PostgreSQL (for production)
 
 ### 1. Clone the repository
 
@@ -105,7 +106,12 @@ source ba_portfolio/venv/bin/activate
 pip install -r ba_portfolio/requirements.txt
 ```
 
-### 4. Run the development server
+### 4. Configure Database
+Copy `.env.example` to `.env` and update the `DATABASE_URL`.
+- For **Local Development**: You can keep the default `sqlite:///portfolio.db`.
+- For **Production**: Use `postgresql://username:password@localhost:5432/db_name`.
+
+### 5. Run the development server
 
 ```bash
 cd ba_portfolio

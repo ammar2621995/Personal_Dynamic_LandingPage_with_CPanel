@@ -1,0 +1,45 @@
+# ──────────────────────────────────────────
+#  BA Portfolio — .gitignore
+# ──────────────────────────────────────────
+
+# Environment variables — NEVER commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Database
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files (user content)
+ba_portfolio/static/uploads/
+ba_portfolio/static/attachments/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log

@@ -6,13 +6,33 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import markdown2
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dev_portfolio_secret_key!@#'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
+
+# ── Sensitive configuration loaded from .env ───────────────
+db_url = os.getenv('DATABASE_URL', 'sqlite:///portfolio.db')
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-dev-key-change-me')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['ATTACHMENTS_FOLDER'] = 'static/attachments'
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'static/uploads')
+app.config['ATTACHMENTS_FOLDER'] = os.getenv('ATTACHMENTS_FOLDER', 'static/attachments')
+app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+
+# Warn loudly in production if using the fallback secret key
+if app.config['SECRET_KEY'] == 'fallback-dev-key-change-me':
+    import warnings
+    warnings.warn(
+        "WARNING: SECRET_KEY is not set in .env — using insecure fallback. "
+        "Set a strong SECRET_KEY before deploying to production!",
+        stacklevel=2
+    )
 
 # Ensure upload directories exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -80,9 +100,10 @@ class BlogSubscriber(db.Model):
 # --- INIT DATABASE ---
 with app.app_context():
     db.create_all()
-    # Seed single personal info
+    # Seed single personal info record with admin password from .env
     if not PersonalInformation.query.first():
-        info = PersonalInformation(admin_password=generate_password_hash('admin123'))
+        default_password = os.getenv('ADMIN_DEFAULT_PASSWORD', 'admin123')
+        info = PersonalInformation(admin_password=generate_password_hash(default_password))
         db.session.add(info)
         db.session.commit()
 
