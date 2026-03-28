@@ -15,8 +15,15 @@ app = Flask(__name__)
 
 # ── Sensitive configuration loaded from .env ───────────────
 db_url = os.getenv('DATABASE_URL', 'sqlite:///portfolio.db')
+
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
+elif db_url.startswith("sqlite:///"):
+    # If a relative SQLite path is provided, make it absolute relative to this file
+    db_rel_path = db_url.replace("sqlite:///", "", 1)
+    if not os.path.isabs(db_rel_path):
+        db_abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), db_rel_path)
+        db_url = f'sqlite:///{db_abs_path}'
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-dev-key-change-me')
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url

@@ -4,5 +4,3 @@ Werkzeug
 markdown2
 python-dotenv
 gunicorn
-psycopg2-binary
-psycopg2-binary
